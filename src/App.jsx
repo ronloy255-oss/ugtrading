@@ -852,53 +852,30 @@ function App() {
         </div>
 
         <nav className="nav" aria-label="Main navigation">
-          <button
-            type="button"
-            className={currentView === 'operator' ? 'nav-link active' : 'nav-link'}
-            onClick={() => setCurrentView('operator')}
-          >
-            Overview
-          </button>
-          <button
-            type="button"
-            className={currentView === 'customer' ? 'nav-link active' : 'nav-link'}
-            onClick={() => {
-              if (!isLoggedIn) {
-                setShowLoginModal(true)
-                return
-              }
-              setCurrentView('customer')
-            }}
-          >
-            Customer portal
-          </button>
-          <button type="button" className="nav-link" onClick={() => setCurrentView('operator')}>
-            Markets
-          </button>
-          <button
-            type="button"
-            className={currentView === 'crypto' ? 'nav-link active' : 'nav-link'}
-            onClick={() => setCurrentView('crypto')}
-          >
-            Crypto
-          </button>
-          <button
-            type="button"
-            className={currentView === 'contact' ? 'nav-link active' : 'nav-link'}
-            onClick={() => setCurrentView('contact')}
-          >
-            Contact us
-          </button>
-          <button
-            type="button"
-            className={currentView === 'faq' ? 'nav-link active' : 'nav-link'}
-            onClick={() => setCurrentView('faq')}
-          >
-            FAQ
-          </button>
-          <button type="button" className="nav-link" onClick={() => setCurrentView('customer')}>
-            Portfolio
-          </button>
+          <details className="nav-dropdown" open={currentView === 'operator' || currentView === 'crypto'}>
+            <summary className={currentView === 'operator' || currentView === 'crypto' ? 'nav-link active' : 'nav-link'}>Trade <span aria-hidden="true">⌄</span></summary>
+            <div className="nav-dropdown-menu">
+              <button type="button" className={currentView === 'operator' ? 'nav-link active' : 'nav-link'} onClick={() => setCurrentView('operator')}>Overview & markets</button>
+              <button type="button" className={currentView === 'crypto' ? 'nav-link active' : 'nav-link'} onClick={() => setCurrentView('crypto')}>Crypto trading</button>
+            </div>
+          </details>
+
+          <details className="nav-dropdown" open={currentView === 'customer'}>
+            <summary className={currentView === 'customer' ? 'nav-link active' : 'nav-link'}>Account <span aria-hidden="true">⌄</span></summary>
+            <div className="nav-dropdown-menu">
+              <button type="button" className="nav-link" onClick={() => { if (!isLoggedIn) { setShowLoginModal(true); return }; setCurrentView('customer') }}>Customer portal</button>
+              <button type="button" className="nav-link" onClick={() => { if (!isLoggedIn) { setShowLoginModal(true); return }; setCurrentView('customer'); setCustomerSubView('overview') }}>Portfolio overview</button>
+              <button type="button" className="nav-link" onClick={() => { if (!isLoggedIn) { setShowLoginModal(true); return }; setCurrentView('customer'); setCustomerSubView('details') }}>Account details</button>
+            </div>
+          </details>
+
+          <details className="nav-dropdown" open={currentView === 'contact' || currentView === 'faq'}>
+            <summary className={currentView === 'contact' || currentView === 'faq' ? 'nav-link active' : 'nav-link'}>Help <span aria-hidden="true">⌄</span></summary>
+            <div className="nav-dropdown-menu">
+              <button type="button" className={currentView === 'contact' ? 'nav-link active' : 'nav-link'} onClick={() => setCurrentView('contact')}>Contact us</button>
+              <button type="button" className={currentView === 'faq' ? 'nav-link active' : 'nav-link'} onClick={() => setCurrentView('faq')}>FAQ</button>
+            </div>
+          </details>
         </nav>
 
         <div className="share-actions" aria-label="Share Jaguar Markets">
