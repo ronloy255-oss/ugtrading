@@ -256,12 +256,80 @@ a.secondary-button {
   background: repeating-linear-gradient(to bottom, transparent 0, transparent 68px, rgba(148, 163, 184, 0.08) 69px, transparent 70px);
 }
 
-.crypto-chart span {
+.crypto-chart .candle {
+  position: relative;
   flex: 1;
   min-width: 10px;
-  border-radius: 8px 8px 0 0;
-  background: linear-gradient(180deg, #67e8f9, #0e7490);
-  opacity: 0.9;
+  height: var(--candle-high);
+  background: linear-gradient(to bottom, transparent calc(var(--candle-high) - var(--candle-low)), currentColor 0, currentColor 100%);
+  color: #22c55e;
+}
+
+.crypto-chart .candle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(100% - var(--candle-high));
+  bottom: calc(100% - var(--candle-low));
+  width: 2px;
+  transform: translateX(-50%);
+  background: currentColor;
+}
+
+.crypto-chart .candle i {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  min-height: 12px;
+  border-radius: 3px;
+  background: currentColor;
+}
+
+.crypto-chart .candle-down {
+  color: #fb7185;
+}
+
+.trend-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.trend-signal {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 11px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.trend-signal span,
+.trend-signal small {
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+.trend-signal strong {
+  color: #e2e8f0;
+  font-size: 0.92rem;
+}
+
+.buy-signal {
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.buy-signal strong {
+  color: #86efac;
+}
+
+.sell-signal {
+  border-color: rgba(251, 113, 133, 0.25);
+}
+
+.sell-signal strong {
+  color: #fda4af;
 }
 
 .chart-axis {

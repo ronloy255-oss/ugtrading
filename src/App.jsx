@@ -34,6 +34,21 @@ const cryptoMarkets = [
   { symbol: 'BNB/USDT', name: 'BNB', price: 586.77, change: '+0.92%', positive: true, volume: '$392M', spark: [46, 51, 48, 58, 56, 62, 60, 67, 64, 71, 68, 76] },
 ]
 
+const cryptoCandles = [
+  { open: 38, close: 52, high: 60, low: 31 },
+  { open: 52, close: 47, high: 58, low: 40 },
+  { open: 47, close: 59, high: 66, low: 43 },
+  { open: 59, close: 55, high: 64, low: 49 },
+  { open: 55, close: 68, high: 74, low: 51 },
+  { open: 68, close: 63, high: 76, low: 58 },
+  { open: 63, close: 77, high: 83, low: 60 },
+  { open: 77, close: 72, high: 81, low: 68 },
+  { open: 72, close: 86, high: 92, low: 69 },
+  { open: 86, close: 82, high: 95, low: 78 },
+  { open: 82, close: 94, high: 99, low: 79 },
+  { open: 94, close: 90, high: 98, low: 86 },
+]
+
 const initialTrades = [
   { symbol: 'NVDA', side: 'Buy', quantity: 18, total: 2211.12, time: '09:42 AM' },
   { symbol: 'AAPL', side: 'Sell', quantity: 12, total: 2575.56, time: '08:18 AM' },
@@ -174,6 +189,7 @@ function App() {
   const [selectedCrypto, setSelectedCrypto] = useState('BTC/USDT')
   const [cryptoSide, setCryptoSide] = useState('Buy')
   const [cryptoQuantity, setCryptoQuantity] = useState('0.025')
+  const [cryptoTimeframe, setCryptoTimeframe] = useState('1D')
   const [cryptoOrders, setCryptoOrders] = useState([
     { symbol: 'ETH/USDT', side: 'Buy', quantity: '0.40', total: '$1,392.86', status: 'Filled', time: '10:18 AM' },
     { symbol: 'BTC/USDT', side: 'Buy', quantity: '0.015', total: '$964.21', status: 'Filled', time: 'Yesterday' },
@@ -1113,13 +1129,18 @@ function App() {
                 </div>
               </div>
               <div className="chart-toolbar">
-                {['1H', '4H', '1D', '1W'].map((period) => <button key={period} type="button" className={period === '1D' ? 'chart-period active' : 'chart-period'}>{period}</button>)}
+                {['1H', '4H', '1D', '1W'].map((period) => <button key={period} type="button" className={period === cryptoTimeframe ? 'chart-period active' : 'chart-period'} onClick={() => setCryptoTimeframe(period)}>{period}</button>)}
                 <span>USD / USDT</span>
               </div>
               <div className="crypto-chart" aria-label={`${selectedCryptoMarket.symbol} price chart`}>
-                {selectedCryptoMarket.spark.map((value, index) => <span key={`${value}-${index}`} style={{ height: `${value}%` }} />)}
+                {cryptoCandles.map((candle, index) => <span key={`${candle.open}-${index}`} className={candle.close >= candle.open ? 'candle candle-up' : 'candle candle-down'} style={{ '--candle-high': `${candle.high}%`, '--candle-low': `${candle.low}%` }}><i style={{ top: `${100 - Math.max(candle.open, candle.close)}%`, height: `${Math.max(Math.abs(candle.close - candle.open), 5)}%` }} /></span>)}
               </div>
               <div className="chart-axis"><span>00:00</span><span>08:00</span><span>16:00</span><span>Now</span></div>
+              <div className="trend-strip">
+                <div className="trend-signal buy-signal"><span>Buy trend</span><strong>Strong</strong><small>Momentum +72 • {cryptoTimeframe}</small></div>
+                <div className="trend-signal sell-signal"><span>Sell pressure</span><strong>Low</strong><small>Resistance $65,420</small></div>
+                <div className="trend-signal"><span>Support</span><strong>$61,880</strong><small>Volume confirms trend</small></div>
+              </div>
             </article>
 
             <article className="panel crypto-ticket">
