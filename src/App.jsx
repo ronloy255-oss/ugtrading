@@ -174,7 +174,7 @@ function App() {
   const [walletTransactions, setWalletTransactions] = useState(initialWalletTransactions)
   const [positions, setPositions] = useState(initialPositions)
   const [customers, setCustomers] = useState(initialCustomers)
-  const [transferHistory, setTransferHistory] = useState(initialTransferHistory)
+  const [transferHistory] = useState(initialTransferHistory)
   const [approvalQueue, setApprovalQueue] = useState(initialApprovalQueue)
   const [approvalFilter, setApprovalFilter] = useState('All')
   const [selectedApprovals, setSelectedApprovals] = useState([])
