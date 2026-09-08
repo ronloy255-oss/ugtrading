@@ -49,6 +49,15 @@ const cryptoCandles = [
   { open: 94, close: 90, high: 98, low: 86 },
 ]
 
+const faqItems = [
+  { question: 'How do I open a customer account?', answer: 'Choose Open account, complete your contact and funding details, then submit the form. Each customer receives a unique account number and private portal context.' },
+  { question: 'Which payment methods are supported?', answer: 'The platform supports MTN Mobile Money, Airtel Money, M-Pesa, bank accounts, Visa, and Mastercard details. Mobile-money transactions require customer confirmation on the phone.' },
+  { question: 'Are crypto prices live?', answer: 'The crypto workspace uses Binance Spot market data through the server API. It defaults to Binance Testnet until live credentials and live-trading configuration are intentionally enabled.' },
+  { question: 'Can I buy and sell crypto?', answer: 'Yes. Select a crypto pair, choose Buy or Sell, enter the quantity, and submit the order. Testnet orders use test funds; live orders require an approved exchange account and server-side credentials.' },
+  { question: 'How are customer payment details protected?', answer: 'Payment-provider secrets stay on the server and are never sent to the browser. Production use also requires authentication, KYC/AML controls, secure storage, webhook verification, and reconciliation.' },
+  { question: 'How can I contact Jaguar Markets?', answer: 'Use the Contact us page or email ronloy255@gmail.com. Include your account number and a short description so the support team can respond efficiently.' },
+]
+
 const initialTrades = [
   { symbol: 'NVDA', side: 'Buy', quantity: 18, total: 2211.12, time: '09:42 AM' },
   { symbol: 'AAPL', side: 'Sell', quantity: 12, total: 2575.56, time: '08:18 AM' },
@@ -858,6 +867,13 @@ function App() {
           >
             Contact us
           </button>
+          <button
+            type="button"
+            className={currentView === 'faq' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setCurrentView('faq')}
+          >
+            FAQ
+          </button>
           <button type="button" className="nav-link" onClick={() => setCurrentView('customer')}>
             Portfolio
           </button>
@@ -1309,6 +1325,39 @@ function App() {
               <div className="contact-info-item"><span>Trading enquiries</span><strong>Market and order support</strong></div>
               <div className="contact-info-item"><span>Funding enquiries</span><strong>Mobile money and account support</strong></div>
               <div className="contact-info-item"><span>Response window</span><strong>During business hours</strong></div>
+            </aside>
+          </section>
+        </main>
+      ) : currentView === 'faq' ? (
+        <main className="faq-page">
+          <section className="faq-hero panel">
+            <div>
+              <p className="eyebrow small">Jaguar Markets help center</p>
+              <h1>Answers before you trade.</h1>
+              <p className="subtitle">Find quick answers about customer accounts, payment methods, crypto markets, and account support.</p>
+            </div>
+            <a className="secondary-button" href="mailto:ronloy255@gmail.com">Ask support</a>
+          </section>
+
+          <section className="faq-layout">
+            <article className="panel faq-list">
+              <div className="panel-header">
+                <div><p className="eyebrow small">Common questions</p><h2>Frequently asked questions</h2></div>
+              </div>
+              {faqItems.map((item) => (
+                <details className="faq-item" key={item.question}>
+                  <summary>{item.question}<span aria-hidden="true">+</span></summary>
+                  <p>{item.answer}</p>
+                </details>
+              ))}
+            </article>
+
+            <aside className="panel faq-side-card">
+              <p className="eyebrow small">Need more help?</p>
+              <h2>Talk to our team.</h2>
+              <p>For account-specific questions, include your customer account number in your message.</p>
+              <a className="primary-button" href="mailto:ronloy255@gmail.com?subject=Jaguar%20Markets%20support">Email support</a>
+              <div className="faq-support-line"><span>Email</span><strong>ronloy255@gmail.com</strong></div>
             </aside>
           </section>
         </main>

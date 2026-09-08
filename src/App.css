@@ -123,6 +123,119 @@ a.secondary-button {
   gap: 22px;
 }
 
+.faq-page {
+  margin-top: 28px;
+  display: grid;
+  gap: 22px;
+}
+
+.faq-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px 28px;
+  background: linear-gradient(120deg, rgba(49, 46, 129, 0.62), rgba(15, 23, 42, 0.92));
+}
+
+.faq-hero h1 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  letter-spacing: -0.05em;
+}
+
+.faq-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 18px;
+}
+
+.faq-list,
+.faq-side-card {
+  padding: 24px;
+}
+
+.faq-item {
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.faq-item:last-child {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 0;
+  color: #e2e8f0;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary span {
+  color: #67e8f9;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.faq-item[open] summary span {
+  transform: rotate(45deg);
+}
+
+.faq-item p {
+  max-width: 720px;
+  margin: -2px 34px 18px 0;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.faq-side-card {
+  align-self: start;
+}
+
+.faq-side-card h2 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.faq-side-card > p:not(.eyebrow) {
+  color: #94a3b8;
+  line-height: 1.7;
+}
+
+.faq-side-card .primary-button {
+  display: inline-block;
+  margin-top: 12px;
+  text-decoration: none;
+}
+
+.faq-support-line {
+  display: grid;
+  gap: 5px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.faq-support-line span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.faq-support-line strong {
+  color: #67e8f9;
+  font-size: 0.88rem;
+}
+
 .contact-hero {
   display: flex;
   align-items: center;
@@ -1823,6 +1936,15 @@ a.secondary-button {
   }
 
   .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .faq-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .faq-layout {
     grid-template-columns: 1fr;
   }
 }
