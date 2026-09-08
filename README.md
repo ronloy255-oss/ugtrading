@@ -19,6 +19,10 @@ The collection endpoint is `POST /api/payments/collect` with JSON containing `pr
 
 Run `supabase/schema.sql` in the Supabase SQL editor, then add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to `.env`. The service-role key is server-only and must never be exposed to Vite. The API persists payment transactions and accepts withdrawal requests at `POST /api/payments/withdrawals`.
 
+## Crypto trading
+
+The crypto workspace uses Binance Spot Testnet through the server API. Add `BINANCE_API_KEY` and `BINANCE_API_SECRET` from the Binance testnet account to `.env`. The browser requests live testnet quotes from `GET /api/crypto/markets` and submits market orders through `POST /api/crypto/orders`; credentials never enter the browser. Switch `BINANCE_BASE_URL` and credentials only after completing exchange and regulatory requirements for live trading.
+
 This is an integration foundation, not a complete regulated financial service. Production launch still requires verified webhooks, persistent transaction records, authentication, KYC/AML controls, reconciliation, refund handling, and legal approval.
 
 ## Frontend development

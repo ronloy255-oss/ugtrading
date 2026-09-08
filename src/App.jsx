@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 const stats = [
@@ -200,6 +200,7 @@ function App() {
     { symbol: 'ETH/USDT', side: 'Buy', quantity: '0.40', total: '$1,392.86', status: 'Filled', time: '10:18 AM' },
     { symbol: 'BTC/USDT', side: 'Buy', quantity: '0.015', total: '$964.21', status: 'Filled', time: 'Yesterday' },
   ])
+  const [liveCryptoMarkets, setLiveCryptoMarkets] = useState(cryptoMarkets)
   const [side, setSide] = useState('Buy')
   const [quantity, setQuantity] = useState(25)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Mobile Money')
@@ -258,8 +259,34 @@ function App() {
   const customerRiskLabel = `${activeCustomer.kycStatus || 'Verified'} • ${activeCustomer.riskLevel || 'Moderate'} risk`
   const workflowProgress = ((currentFlowStep + 1) / workflowStages.length) * 100
   const currentWorkflowStage = workflowStages[Math.min(currentFlowStep, workflowStages.length - 1)]
-  const selectedCryptoMarket = cryptoMarkets.find((market) => market.symbol === selectedCrypto) ?? cryptoMarkets[0]
+  const selectedCryptoMarket = liveCryptoMarkets.find((market) => market.symbol === selectedCrypto) ?? liveCryptoMarkets[0]
   const cryptoNotional = Number((selectedCryptoMarket.price * Number(cryptoQuantity || 0)).toFixed(2))
+  const selectedCryptoCandles = selectedCryptoMarket.candles || cryptoCandles.map((candle) => ({ open: candle.open, high: candle.high, low: candle.low, close: candle.close }))
+  const candleValues = selectedCryptoCandles.flatMap((candle) => [candle.high, candle.low])
+  const candleMin = Math.min(...candleValues)
+  const candleRange = Math.max(...candleValues) - candleMin || 1
+  const candleLayout = selectedCryptoCandles.map((candle) => ({
+    open: ((candle.open - candleMin) / candleRange) * 76 + 12,
+    high: ((candle.high - candleMin) / candleRange) * 76 + 12,
+    low: ((candle.low - candleMin) / candleRange) * 76 + 12,
+    close: ((candle.close - candleMin) / candleRange) * 76 + 12,
+  }))
+
+  useEffect(() => {
+    if (currentView !== 'crypto') return
+    const apiUrl = import.meta.env.VITE_PAYMENT_API_URL || 'http://localhost:8787'
+    fetch(`${apiUrl}/api/crypto/markets?symbols=BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT`)
+      .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) throw new Error(data.error || 'Live crypto feed unavailable')
+        setLiveCryptoMarkets((current) => current.map((market) => {
+          const liveMarket = data.markets.find((item) => item.symbol === market.symbol.replace('/', ''))
+          return liveMarket ? { ...market, ...liveMarket, symbol: market.symbol } : market
+        }))
+        setStatus('Live Binance Spot Testnet crypto prices connected.')
+      })
+      .catch((error) => setStatus(`Live crypto feed unavailable: ${error.message}`))
+  }, [currentView])
   const btcEmailHref = `mailto:ronloy255@gmail.com?subject=${encodeURIComponent('BTC purchase request')}&body=${encodeURIComponent(`Hello,\n\nI would like to buy BTC through Jaguar Markets.\nQuantity: ${Number(cryptoQuantity || 0).toFixed(6)} BTC\nEstimated value: ${formatCurrency(cryptoNotional)}\n\nPlease confirm the next steps.`)}`
 
   const openConfirmation = () => {
@@ -354,16 +381,27 @@ function App() {
       return
     }
 
-    const order = {
-      symbol: selectedCryptoMarket.symbol,
-      side: cryptoSide,
-      quantity: quantity.toFixed(6),
-      total: formatCurrency(cryptoNotional),
-      status: 'Filled',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    }
-    setCryptoOrders((current) => [order, ...current].slice(0, 5))
-    setStatus(`${cryptoSide} order filled for ${order.quantity} ${selectedCryptoMarket.symbol} at ${order.total}. Crypto execution is simulated in this demo.`)
+    const apiUrl = import.meta.env.VITE_PAYMENT_API_URL || 'http://localhost:8787'
+    fetch(`${apiUrl}/api/crypto/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol: selectedCryptoMarket.symbol.replace('/', ''), side: cryptoSide, quantity }),
+    })
+      .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) throw new Error(data.error || 'The crypto exchange rejected the order.')
+        const order = {
+          symbol: selectedCryptoMarket.symbol,
+          side: cryptoSide,
+          quantity: quantity.toFixed(6),
+          total: formatCurrency(cryptoNotional),
+          status: data.order?.status || 'Submitted',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }
+        setCryptoOrders((current) => [order, ...current].slice(0, 5))
+        setStatus(`${cryptoSide} order submitted to Binance Spot Testnet for ${order.quantity} ${selectedCryptoMarket.symbol}.`)
+      })
+      .catch((error) => setStatus(`Crypto order failed: ${error.message}`))
   }
 
   const handleAccountOpen = () => {
@@ -1159,7 +1197,7 @@ function App() {
                 <span>USD / USDT</span>
               </div>
               <div className="crypto-chart" aria-label={`${selectedCryptoMarket.symbol} price chart`}>
-                {cryptoCandles.map((candle, index) => <span key={`${candle.open}-${index}`} className={candle.close >= candle.open ? 'candle candle-up' : 'candle candle-down'} style={{ '--candle-high': `${candle.high}%`, '--candle-low': `${candle.low}%` }}><i style={{ top: `${100 - Math.max(candle.open, candle.close)}%`, height: `${Math.max(Math.abs(candle.close - candle.open), 5)}%` }} /></span>)}
+                {candleLayout.map((candle, index) => <span key={`${candle.open}-${index}`} className={candle.close >= candle.open ? 'candle candle-up' : 'candle candle-down'} style={{ '--candle-high': `${candle.high}%`, '--candle-low': `${candle.low}%` }}><i style={{ top: `${100 - Math.max(candle.open, candle.close)}%`, height: `${Math.max(Math.abs(candle.close - candle.open), 5)}%` }} /></span>)}
               </div>
               <div className="chart-axis"><span>00:00</span><span>08:00</span><span>16:00</span><span>Now</span></div>
               <div className="trend-strip">
@@ -1180,7 +1218,7 @@ function App() {
               </div>
               <label className="field-label" htmlFor="cryptoPair">Trading pair</label>
               <select id="cryptoPair" value={selectedCrypto} onChange={(event) => setSelectedCrypto(event.target.value)}>
-                {cryptoMarkets.map((market) => <option key={market.symbol} value={market.symbol}>{market.symbol}</option>)}
+                {liveCryptoMarkets.map((market) => <option key={market.symbol} value={market.symbol}>{market.symbol}</option>)}
               </select>
               <label className="field-label" htmlFor="cryptoQuantity">Quantity</label>
               <div className="crypto-input-wrap"><input id="cryptoQuantity" type="number" min="0.000001" step="0.000001" value={cryptoQuantity} onChange={(event) => setCryptoQuantity(event.target.value)} /><span>{selectedCryptoMarket.symbol.split('/')[0]}</span></div>
@@ -1199,7 +1237,7 @@ function App() {
             <article className="panel crypto-markets-panel">
               <div className="panel-header"><div><p className="eyebrow small">Market explorer</p><h2>Top crypto pairs</h2></div><span className="muted-symbol">Updated just now</span></div>
               <div className="crypto-market-list">
-                {cryptoMarkets.map((market) => <button key={market.symbol} type="button" className={market.symbol === selectedCrypto ? 'crypto-market-row active' : 'crypto-market-row'} onClick={() => setSelectedCrypto(market.symbol)}><span className="coin-badge">{market.symbol.split('/')[0].slice(0, 1)}</span><span className="crypto-name"><strong>{market.name}</strong><small>{market.symbol}</small></span><strong>${market.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong><span className={market.positive ? 'positive' : 'negative'}>{market.change}</span><small>{market.volume}</small></button>)}
+                {liveCryptoMarkets.map((market) => <button key={market.symbol} type="button" className={market.symbol === selectedCrypto ? 'crypto-market-row active' : 'crypto-market-row'} onClick={() => setSelectedCrypto(market.symbol)}><span className="coin-badge">{market.symbol.split('/')[0].slice(0, 1)}</span><span className="crypto-name"><strong>{market.name}</strong><small>{market.symbol}</small></span><strong>${market.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong><span className={market.positive ? 'positive' : 'negative'}>{market.change}</span><small>{market.volume}</small></button>)}
               </div>
             </article>
             <article className="panel crypto-orders-panel">
