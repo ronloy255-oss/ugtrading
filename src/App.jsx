@@ -297,6 +297,20 @@ function App() {
   }))
 
   useEffect(() => {
+    const isContactPage = currentView === 'contact'
+    const title = isContactPage
+      ? 'Contact Jaguar Markets | Uganda Trading Support'
+      : 'Jaguar Markets | Uganda Stock & Crypto Trading'
+    const description = isContactPage
+      ? 'Contact Jaguar Markets for Uganda stock and crypto trading support, account funding help, and portfolio assistance.'
+      : 'Explore stocks, crypto markets, portfolio tracking, and secure account funding with Jaguar Markets, a Uganda-focused trading platform.'
+    document.title = title
+    document.querySelector('meta[name="description"]')?.setAttribute('content', description)
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
+  }, [currentView])
+
+  useEffect(() => {
     if (currentView !== 'crypto') return
     const apiUrl = import.meta.env.VITE_PAYMENT_API_URL || 'http://localhost:8787'
     fetch(`${apiUrl}/api/crypto/markets?symbols=BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT`)
@@ -896,9 +910,9 @@ function App() {
           <button type="button" className="share-button share-native" onClick={handleNativeShare} title="Share this page">
             {shareCopied ? 'Copied' : 'Share'}
           </button>
-          <a className="share-button" href={`https://wa.me/?text=${shareText}%20${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading256.com/')}`} target="_blank" rel="noreferrer" title="Share on WhatsApp">WA</a>
-          <a className="share-button" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading256.com/')}`} target="_blank" rel="noreferrer" title="Share on Facebook">f</a>
-          <a className="share-button" href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading256.com/')}`} target="_blank" rel="noreferrer" title="Share on X">X</a>
+          <a className="share-button" href={`https://wa.me/?text=${shareText}%20${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading212.com/')}`} target="_blank" rel="noreferrer" title="Share on WhatsApp">WA</a>
+          <a className="share-button" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading212.com/')}`} target="_blank" rel="noreferrer" title="Share on Facebook">f</a>
+          <a className="share-button" href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading212.com/')}`} target="_blank" rel="noreferrer" title="Share on X">X</a>
         </div>
 
         <button
@@ -2356,6 +2370,27 @@ function App() {
           </div>
         </div>
       )}
+
+      <footer className="site-footer">
+        <div className="footer-brand">
+          <span className="brand-mark" aria-hidden="true">J</span>
+          <div>
+            <strong>Jaguar Markets</strong>
+            <small>Uganda stock and crypto trading</small>
+          </div>
+        </div>
+        <nav className="footer-links" aria-label="Footer navigation">
+          <button type="button" onClick={() => setCurrentView('operator')}>Markets</button>
+          <button type="button" onClick={() => setCurrentView('crypto')}>Crypto</button>
+          <button type="button" onClick={() => setCurrentView('contact')}>Contact us</button>
+          <button type="button" onClick={() => setCurrentView('faq')}>FAQ</button>
+          <a href="mailto:ronloy255@gmail.com">Email support</a>
+        </nav>
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} Jaguar Markets</span>
+          <span>Trading involves risk. Demo data may be delayed.</span>
+        </div>
+      </footer>
 
       <a
         className="whatsapp-widget"

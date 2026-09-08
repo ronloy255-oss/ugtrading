@@ -4,6 +4,73 @@
   padding: 28px 0 48px;
 }
 
+.site-footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 22px 32px;
+  margin-top: 42px;
+  padding: 24px 0 8px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  color: #94a3b8;
+}
+
+.footer-brand,
+.footer-links,
+.footer-bottom {
+  display: flex;
+  align-items: center;
+}
+
+.footer-brand {
+  gap: 10px;
+}
+
+.footer-brand strong,
+.footer-brand small {
+  display: block;
+}
+
+.footer-brand strong {
+  color: #e2e8f0;
+  font-size: 0.88rem;
+}
+
+.footer-brand small,
+.footer-bottom {
+  font-size: 0.72rem;
+}
+
+.footer-links {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 18px;
+}
+
+.footer-links button,
+.footer-links a {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #94a3b8;
+  font: inherit;
+  font-size: 0.78rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.footer-links button:hover,
+.footer-links a:hover {
+  color: #67e8f9;
+}
+
+.footer-bottom {
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -2274,6 +2341,19 @@ a.secondary-button {
 
   .contact-form .primary-button {
     width: 100%;
+  }
+
+  .site-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
+  }
+
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .crypto-market-row {
