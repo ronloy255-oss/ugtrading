@@ -200,6 +200,7 @@ function App() {
     { symbol: 'ETH/USDT', side: 'Buy', quantity: '0.40', total: '$1,392.86', status: 'Filled', time: '10:18 AM' },
     { symbol: 'BTC/USDT', side: 'Buy', quantity: '0.015', total: '$964.21', status: 'Filled', time: 'Yesterday' },
   ])
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [liveCryptoMarkets, setLiveCryptoMarkets] = useState(cryptoMarkets)
   const [side, setSide] = useState('Buy')
   const [quantity, setQuantity] = useState(25)
@@ -301,6 +302,24 @@ function App() {
   const handleLoginInput = (event) => {
     const { name, value } = event.target
     setLoginForm((current) => ({ ...current, [name]: value }))
+  }
+
+  const handleContactInput = (event) => {
+    const { name, value } = event.target
+    setContactForm((current) => ({ ...current, [name]: value }))
+  }
+
+  const handleContactSubmit = (event) => {
+    event.preventDefault()
+    const { name, email, subject, message } = contactForm
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setStatus('Please complete your name, email, and message before contacting us.')
+      return
+    }
+
+    const emailSubject = encodeURIComponent(subject.trim() || 'Jaguar Markets enquiry')
+    const emailBody = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)
+    window.location.assign(`mailto:ronloy255@gmail.com?subject=${emailSubject}&body=${emailBody}`)
   }
 
   const handlePaymentInput = (event) => {
@@ -832,6 +851,13 @@ function App() {
           >
             Crypto
           </button>
+          <button
+            type="button"
+            className={currentView === 'contact' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setCurrentView('contact')}
+          >
+            Contact us
+          </button>
           <button type="button" className="nav-link" onClick={() => setCurrentView('customer')}>
             Portfolio
           </button>
@@ -1244,6 +1270,46 @@ function App() {
               <div className="panel-header"><div><p className="eyebrow small">Execution log</p><h2>Recent crypto orders</h2></div></div>
               <div className="crypto-order-list">{cryptoOrders.map((order, index) => <div className="crypto-order-row" key={`${order.symbol}-${order.time}-${index}`}><div><strong>{order.symbol}</strong><small>{order.side} • {order.quantity}</small></div><div><strong>{order.total}</strong><small className="positive">{order.status} • {order.time}</small></div></div>)}</div>
             </article>
+          </section>
+        </main>
+      ) : currentView === 'contact' ? (
+        <main className="contact-page">
+          <section className="contact-hero panel">
+            <div>
+              <p className="eyebrow small">Jaguar Markets support</p>
+              <h1>Let’s talk about your account.</h1>
+              <p className="subtitle">Questions about trading, funding, crypto, or customer onboarding? Send us a message and our team will respond.</p>
+            </div>
+            <div className="contact-channel">
+              <span>Email support</span>
+              <a href="mailto:ronloy255@gmail.com">ronloy255@gmail.com</a>
+              <small>Account and trading enquiries</small>
+            </div>
+          </section>
+
+          <section className="contact-grid">
+            <form className="panel contact-form" onSubmit={handleContactSubmit}>
+              <div className="panel-header">
+                <div><p className="eyebrow small">Send a message</p><h2>Contact us</h2></div>
+              </div>
+              <div className="contact-form-grid">
+                <label>Full name<input name="name" value={contactForm.name} onChange={handleContactInput} placeholder="Your name" /></label>
+                <label>Email address<input name="email" type="email" value={contactForm.email} onChange={handleContactInput} placeholder="you@example.com" /></label>
+              </div>
+              <label>Subject<input name="subject" value={contactForm.subject} onChange={handleContactInput} placeholder="How can we help?" /></label>
+              <label>Message<textarea name="message" rows="7" value={contactForm.message} onChange={handleContactInput} placeholder="Tell us what you need help with..." /></label>
+              <button type="submit" className="primary-button">Open email draft</button>
+              <small className="contact-note">Your default email application will open with your message addressed to Jaguar Markets.</small>
+            </form>
+
+            <aside className="panel contact-info">
+              <p className="eyebrow small">Support channels</p>
+              <h2>We’re here to help.</h2>
+              <div className="contact-info-item"><span>General support</span><a href="mailto:ronloy255@gmail.com">ronloy255@gmail.com</a></div>
+              <div className="contact-info-item"><span>Trading enquiries</span><strong>Market and order support</strong></div>
+              <div className="contact-info-item"><span>Funding enquiries</span><strong>Mobile money and account support</strong></div>
+              <div className="contact-info-item"><span>Response window</span><strong>During business hours</strong></div>
+            </aside>
           </section>
         </main>
       ) : (
