@@ -210,6 +210,7 @@ function App() {
     { symbol: 'BTC/USDT', side: 'Buy', quantity: '0.015', total: '$964.21', status: 'Filled', time: 'Yesterday' },
   ])
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' })
+  const [shareCopied, setShareCopied] = useState(false)
   const [liveCryptoMarkets, setLiveCryptoMarkets] = useState(cryptoMarkets)
   const [side, setSide] = useState('Buy')
   const [quantity, setQuantity] = useState(25)
@@ -330,6 +331,27 @@ function App() {
     const emailBody = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)
     window.location.assign(`mailto:ronloy255@gmail.com?subject=${emailSubject}&body=${emailBody}`)
   }
+
+  const getShareUrl = () => window.location.href
+
+  const handleNativeShare = async () => {
+    const shareData = {
+      title: 'Jaguar Markets',
+      text: 'Explore Jaguar Markets trading tools and crypto markets.',
+      url: getShareUrl(),
+    }
+
+    if (navigator.share) {
+      await navigator.share(shareData)
+      return
+    }
+
+    await navigator.clipboard.writeText(getShareUrl())
+    setShareCopied(true)
+    window.setTimeout(() => setShareCopied(false), 1800)
+  }
+
+  const shareText = encodeURIComponent('Explore Jaguar Markets trading tools and crypto markets.')
 
   const handlePaymentInput = (event) => {
     const { name, value } = event.target
@@ -878,6 +900,15 @@ function App() {
             Portfolio
           </button>
         </nav>
+
+        <div className="share-actions" aria-label="Share Jaguar Markets">
+          <button type="button" className="share-button share-native" onClick={handleNativeShare} title="Share this page">
+            {shareCopied ? 'Copied' : 'Share'}
+          </button>
+          <a className="share-button" href={`https://wa.me/?text=${shareText}%20${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading256.com/')}`} target="_blank" rel="noreferrer" title="Share on WhatsApp">WA</a>
+          <a className="share-button" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading256.com/')}`} target="_blank" rel="noreferrer" title="Share on Facebook">f</a>
+          <a className="share-button" href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://ugtrading256.com/')}`} target="_blank" rel="noreferrer" title="Share on X">X</a>
+        </div>
 
         <button
           type="button"
