@@ -58,6 +58,15 @@ const faqItems = [
   { question: 'How can I contact Jaguar Markets?', answer: 'Use the Contact us page or email ronloy255@gmail.com. Include your account number and a short description so the support team can respond efficiently.' },
 ]
 
+const economicEvents = [
+  { time: '08:30', date: 'Today', region: 'United States', currency: 'USD', event: 'Nonfarm Payrolls', impact: 'High', forecast: '185K', previous: '142K', actual: '-' },
+  { time: '10:00', date: 'Today', region: 'United States', currency: 'USD', event: 'ISM Services PMI', impact: 'Medium', forecast: '52.6', previous: '51.8', actual: '-' },
+  { time: '14:30', date: 'Today', region: 'Eurozone', currency: 'EUR', event: 'ECB President Speech', impact: 'Medium', forecast: '-', previous: '-', actual: '-' },
+  { time: '02:00', date: 'Tomorrow', region: 'United Kingdom', currency: 'GBP', event: 'Bank Rate Decision', impact: 'High', forecast: '4.50%', previous: '4.50%', actual: '-' },
+  { time: '05:00', date: 'Tomorrow', region: 'Japan', currency: 'JPY', event: 'Consumer Confidence', impact: 'Low', forecast: '36.5', previous: '36.2', actual: '-' },
+  { time: '09:00', date: 'Friday', region: 'Canada', currency: 'CAD', event: 'Employment Change', impact: 'High', forecast: '22.5K', previous: '13.5K', actual: '-' },
+]
+
 const initialTrades = [
   { symbol: 'NVDA', side: 'Buy', quantity: 18, total: 2211.12, time: '09:42 AM' },
   { symbol: 'AAPL', side: 'Sell', quantity: 12, total: 2575.56, time: '08:18 AM' },
@@ -211,6 +220,8 @@ function App() {
   ])
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [shareCopied, setShareCopied] = useState(false)
+  const [calendarImpact, setCalendarImpact] = useState('All')
+  const [calendarRegion, setCalendarRegion] = useState('All')
   const [liveCryptoMarkets, setLiveCryptoMarkets] = useState(cryptoMarkets)
   const [side, setSide] = useState('Buy')
   const [quantity, setQuantity] = useState(25)
@@ -271,6 +282,8 @@ function App() {
   const workflowProgress = ((currentFlowStep + 1) / workflowStages.length) * 100
   const currentWorkflowStage = workflowStages[Math.min(currentFlowStep, workflowStages.length - 1)]
   const selectedCryptoMarket = liveCryptoMarkets.find((market) => market.symbol === selectedCrypto) ?? liveCryptoMarkets[0]
+  const calendarRegions = ['All', ...new Set(economicEvents.map((event) => event.region))]
+  const filteredEconomicEvents = economicEvents.filter((event) => (calendarImpact === 'All' || event.impact === calendarImpact) && (calendarRegion === 'All' || event.region === calendarRegion))
   const cryptoNotional = Number((selectedCryptoMarket.price * Number(cryptoQuantity || 0)).toFixed(2))
   const selectedCryptoCandles = selectedCryptoMarket.candles || cryptoCandles.map((candle) => ({ open: candle.open, high: candle.high, low: candle.low, close: candle.close }))
   const candleValues = selectedCryptoCandles.flatMap((candle) => [candle.high, candle.low])
@@ -852,11 +865,12 @@ function App() {
         </div>
 
         <nav className="nav" aria-label="Main navigation">
-          <details className="nav-dropdown" open={currentView === 'operator' || currentView === 'crypto'}>
-            <summary className={currentView === 'operator' || currentView === 'crypto' ? 'nav-link active' : 'nav-link'}>Trade <span aria-hidden="true">⌄</span></summary>
+          <details className="nav-dropdown" open={currentView === 'operator' || currentView === 'crypto' || currentView === 'calendar'}>
+            <summary className={currentView === 'operator' || currentView === 'crypto' || currentView === 'calendar' ? 'nav-link active' : 'nav-link'}>Trade <span aria-hidden="true">⌄</span></summary>
             <div className="nav-dropdown-menu">
               <button type="button" className={currentView === 'operator' ? 'nav-link active' : 'nav-link'} onClick={() => setCurrentView('operator')}>Overview & markets</button>
               <button type="button" className={currentView === 'crypto' ? 'nav-link active' : 'nav-link'} onClick={() => setCurrentView('crypto')}>Crypto trading</button>
+              <button type="button" className={currentView === 'calendar' ? 'nav-link active' : 'nav-link'} onClick={() => setCurrentView('calendar')}>Economic calendar</button>
             </div>
           </details>
 
@@ -1295,6 +1309,33 @@ function App() {
               <div className="crypto-order-list">{cryptoOrders.map((order, index) => <div className="crypto-order-row" key={`${order.symbol}-${order.time}-${index}`}><div><strong>{order.symbol}</strong><small>{order.side} • {order.quantity}</small></div><div><strong>{order.total}</strong><small className="positive">{order.status} • {order.time}</small></div></div>)}</div>
             </article>
           </section>
+        </main>
+      ) : currentView === 'calendar' ? (
+        <main className="calendar-page">
+          <section className="calendar-hero panel">
+            <div>
+              <p className="eyebrow small">Macro events</p>
+              <h1>Economic calendar.</h1>
+              <p className="subtitle">Track the releases and central-bank events that can move FX, crypto, and global markets.</p>
+            </div>
+            <div className="calendar-status"><span><i className="live-dot" /> Market watch</span><strong>{filteredEconomicEvents.length} events</strong><small>Curated schedule • demo feed</small></div>
+          </section>
+
+          <section className="calendar-toolbar panel">
+            <div className="calendar-toolbar-title"><p className="eyebrow small">Event filters</p><h2>Upcoming releases</h2></div>
+            <label>Impact<select value={calendarImpact} onChange={(event) => setCalendarImpact(event.target.value)}><option>All</option><option>High</option><option>Medium</option><option>Low</option></select></label>
+            <label>Region<select value={calendarRegion} onChange={(event) => setCalendarRegion(event.target.value)}>{calendarRegions.map((region) => <option key={region}>{region}</option>)}</select></label>
+          </section>
+
+          <section className="panel calendar-table-panel">
+            <div className="calendar-table-header"><span>Time</span><span>Event</span><span>Impact</span><span>Forecast</span><span>Previous</span><span>Actual</span></div>
+            <div className="calendar-event-list">
+              {filteredEconomicEvents.map((event) => <div className="calendar-event" key={`${event.date}-${event.time}-${event.event}`}><div className="calendar-time"><strong>{event.time}</strong><small>{event.date}</small></div><div className="calendar-event-name"><span className="calendar-currency">{event.currency}</span><div><strong>{event.event}</strong><small>{event.region}</small></div></div><span className={`impact impact-${event.impact.toLowerCase()}`}><i />{event.impact}</span><strong>{event.forecast}</strong><span>{event.previous}</span><span className="calendar-actual">{event.actual}</span></div>)}
+            </div>
+            {!filteredEconomicEvents.length ? <p className="calendar-empty">No events match the selected filters.</p> : null}
+          </section>
+
+          <p className="calendar-disclaimer">Economic data shown here is a curated demonstration feed. Connect a licensed data provider before relying on release times or figures for live trading decisions.</p>
         </main>
       ) : currentView === 'contact' ? (
         <main className="contact-page">
