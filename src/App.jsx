@@ -27,6 +27,13 @@ const marketRows = [
   { symbol: 'TSLA', last: 184.21, change: '-0.58%', positive: false, volume: '15.3M' },
 ]
 
+const cryptoMarkets = [
+  { symbol: 'BTC/USDT', name: 'Bitcoin', price: 64280.42, change: '+3.84%', positive: true, volume: '$2.8B', spark: [42, 48, 45, 58, 54, 68, 63, 76, 72, 88, 82, 96] },
+  { symbol: 'ETH/USDT', name: 'Ethereum', price: 3482.16, change: '+2.16%', positive: true, volume: '$1.4B', spark: [38, 52, 48, 44, 57, 62, 58, 72, 70, 78, 84, 90] },
+  { symbol: 'SOL/USDT', name: 'Solana', price: 152.4, change: '-1.24%', positive: false, volume: '$684M', spark: [82, 74, 78, 68, 72, 59, 64, 52, 56, 44, 48, 38] },
+  { symbol: 'BNB/USDT', name: 'BNB', price: 586.77, change: '+0.92%', positive: true, volume: '$392M', spark: [46, 51, 48, 58, 56, 62, 60, 67, 64, 71, 68, 76] },
+]
+
 const initialTrades = [
   { symbol: 'NVDA', side: 'Buy', quantity: 18, total: 2211.12, time: '09:42 AM' },
   { symbol: 'AAPL', side: 'Sell', quantity: 12, total: 2575.56, time: '08:18 AM' },
@@ -164,6 +171,13 @@ const getAvatarColor = (name) => {
 
 function App() {
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL')
+  const [selectedCrypto, setSelectedCrypto] = useState('BTC/USDT')
+  const [cryptoSide, setCryptoSide] = useState('Buy')
+  const [cryptoQuantity, setCryptoQuantity] = useState('0.025')
+  const [cryptoOrders, setCryptoOrders] = useState([
+    { symbol: 'ETH/USDT', side: 'Buy', quantity: '0.40', total: '$1,392.86', status: 'Filled', time: '10:18 AM' },
+    { symbol: 'BTC/USDT', side: 'Buy', quantity: '0.015', total: '$964.21', status: 'Filled', time: 'Yesterday' },
+  ])
   const [side, setSide] = useState('Buy')
   const [quantity, setQuantity] = useState(25)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Mobile Money')
@@ -222,6 +236,8 @@ function App() {
   const customerRiskLabel = `${activeCustomer.kycStatus || 'Verified'} • ${activeCustomer.riskLevel || 'Moderate'} risk`
   const workflowProgress = ((currentFlowStep + 1) / workflowStages.length) * 100
   const currentWorkflowStage = workflowStages[Math.min(currentFlowStep, workflowStages.length - 1)]
+  const selectedCryptoMarket = cryptoMarkets.find((market) => market.symbol === selectedCrypto) ?? cryptoMarkets[0]
+  const cryptoNotional = Number((selectedCryptoMarket.price * Number(cryptoQuantity || 0)).toFixed(2))
 
   const openConfirmation = () => {
     setShowModal(true)
@@ -289,6 +305,25 @@ function App() {
     }
 
     setStatus('Please enter both your email and password to sign in.')
+  }
+
+  const handleCryptoOrder = () => {
+    const quantity = Number(cryptoQuantity)
+    if (!quantity || quantity <= 0) {
+      setStatus('Enter a crypto quantity greater than zero before placing the order.')
+      return
+    }
+
+    const order = {
+      symbol: selectedCryptoMarket.symbol,
+      side: cryptoSide,
+      quantity: quantity.toFixed(6),
+      total: formatCurrency(cryptoNotional),
+      status: 'Filled',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }
+    setCryptoOrders((current) => [order, ...current].slice(0, 5))
+    setStatus(`${cryptoSide} order filled for ${order.quantity} ${selectedCryptoMarket.symbol} at ${order.total}. Crypto execution is simulated in this demo.`)
   }
 
   const handleAccountOpen = () => {
@@ -706,6 +741,13 @@ function App() {
           <button type="button" className="nav-link" onClick={() => setCurrentView('operator')}>
             Markets
           </button>
+          <button
+            type="button"
+            className={currentView === 'crypto' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setCurrentView('crypto')}
+          >
+            Crypto
+          </button>
           <button type="button" className="nav-link" onClick={() => setCurrentView('customer')}>
             Portfolio
           </button>
@@ -1019,6 +1061,85 @@ function App() {
               </div>
             </section>
           )}
+        </main>
+      ) : currentView === 'crypto' ? (
+        <main className="crypto-page">
+          <section className="crypto-hero panel">
+            <div>
+              <p className="eyebrow small">24/7 digital assets</p>
+              <h1>Crypto markets, in focus.</h1>
+              <p className="subtitle">Track high-liquidity pairs, compare momentum, and place a crypto order from one calm workspace.</p>
+            </div>
+            <div className="crypto-market-status">
+              <span><i className="live-dot" /> Market open</span>
+              <strong>24/7</strong>
+              <small>Streaming prices • demo feed</small>
+            </div>
+          </section>
+
+          <section className="crypto-stats">
+            <div className="stat-card"><span>Crypto equity</span><strong>$28,640.18</strong><em>+12.4%</em></div>
+            <div className="stat-card"><span>Available USDT</span><strong>8,420.55</strong><em>+4.8%</em></div>
+            <div className="stat-card"><span>24h volume</span><strong>$5.28B</strong><em>Across tracked pairs</em></div>
+            <div className="stat-card"><span>Risk mode</span><strong>Balanced</strong><em>Within limit</em></div>
+          </section>
+
+          <section className="crypto-workspace">
+            <article className="panel crypto-chart-panel">
+              <div className="panel-header">
+                <div>
+                  <p className="eyebrow small">Price action</p>
+                  <h2>{selectedCryptoMarket.name} <span className="muted-symbol">{selectedCryptoMarket.symbol}</span></h2>
+                </div>
+                <div className="crypto-price-block">
+                  <strong>${selectedCryptoMarket.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                  <span className={selectedCryptoMarket.positive ? 'positive' : 'negative'}>{selectedCryptoMarket.change} today</span>
+                </div>
+              </div>
+              <div className="chart-toolbar">
+                {['1H', '4H', '1D', '1W'].map((period) => <button key={period} type="button" className={period === '1D' ? 'chart-period active' : 'chart-period'}>{period}</button>)}
+                <span>USD / USDT</span>
+              </div>
+              <div className="crypto-chart" aria-label={`${selectedCryptoMarket.symbol} price chart`}>
+                {selectedCryptoMarket.spark.map((value, index) => <span key={`${value}-${index}`} style={{ height: `${value}%` }} />)}
+              </div>
+              <div className="chart-axis"><span>00:00</span><span>08:00</span><span>16:00</span><span>Now</span></div>
+            </article>
+
+            <article className="panel crypto-ticket">
+              <div className="panel-header">
+                <div><p className="eyebrow small">Trade crypto</p><h2>Order ticket</h2></div>
+                <span className="pill positive">Low spread</span>
+              </div>
+              <div className="order-toggle" aria-label="Crypto order side">
+                <button type="button" className={cryptoSide === 'Buy' ? 'toggle-button buy active' : 'toggle-button buy'} onClick={() => setCryptoSide('Buy')}>Buy</button>
+                <button type="button" className={cryptoSide === 'Sell' ? 'toggle-button sell active' : 'toggle-button sell'} onClick={() => setCryptoSide('Sell')}>Sell</button>
+              </div>
+              <label className="field-label" htmlFor="cryptoPair">Trading pair</label>
+              <select id="cryptoPair" value={selectedCrypto} onChange={(event) => setSelectedCrypto(event.target.value)}>
+                {cryptoMarkets.map((market) => <option key={market.symbol} value={market.symbol}>{market.symbol}</option>)}
+              </select>
+              <label className="field-label" htmlFor="cryptoQuantity">Quantity</label>
+              <div className="crypto-input-wrap"><input id="cryptoQuantity" type="number" min="0.000001" step="0.000001" value={cryptoQuantity} onChange={(event) => setCryptoQuantity(event.target.value)} /><span>{selectedCryptoMarket.symbol.split('/')[0]}</span></div>
+              <div className="order-summary crypto-summary"><div><span>Mark price</span><strong>${selectedCryptoMarket.price.toLocaleString()}</strong></div><div><span>Estimated total</span><strong>{formatCurrency(cryptoNotional)}</strong></div></div>
+              <div className="account-balance compact"><span>Settlement wallet</span><strong>8,420.55 USDT</strong><small>Verified crypto balance • instant demo settlement</small></div>
+              <button type="button" className={cryptoSide === 'Buy' ? 'primary-button order-button buy-action' : 'secondary-button order-button sell-action'} onClick={handleCryptoOrder}>{cryptoSide} {selectedCryptoMarket.symbol.split('/')[0]}</button>
+              <p className="demo-note">Demo execution only. Connect a regulated exchange or broker API before accepting real orders.</p>
+            </article>
+          </section>
+
+          <section className="crypto-lower-grid">
+            <article className="panel crypto-markets-panel">
+              <div className="panel-header"><div><p className="eyebrow small">Market explorer</p><h2>Top crypto pairs</h2></div><span className="muted-symbol">Updated just now</span></div>
+              <div className="crypto-market-list">
+                {cryptoMarkets.map((market) => <button key={market.symbol} type="button" className={market.symbol === selectedCrypto ? 'crypto-market-row active' : 'crypto-market-row'} onClick={() => setSelectedCrypto(market.symbol)}><span className="coin-badge">{market.symbol.split('/')[0].slice(0, 1)}</span><span className="crypto-name"><strong>{market.name}</strong><small>{market.symbol}</small></span><strong>${market.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong><span className={market.positive ? 'positive' : 'negative'}>{market.change}</span><small>{market.volume}</small></button>)}
+              </div>
+            </article>
+            <article className="panel crypto-orders-panel">
+              <div className="panel-header"><div><p className="eyebrow small">Execution log</p><h2>Recent crypto orders</h2></div></div>
+              <div className="crypto-order-list">{cryptoOrders.map((order, index) => <div className="crypto-order-row" key={`${order.symbol}-${order.time}-${index}`}><div><strong>{order.symbol}</strong><small>{order.side} • {order.quantity}</small></div><div><strong>{order.total}</strong><small className="positive">{order.status} • {order.time}</small></div></div>)}</div>
+            </article>
+          </section>
         </main>
       ) : (
         <main className="dashboard" id="overview">
