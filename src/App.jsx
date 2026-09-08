@@ -314,6 +314,21 @@ function App() {
       return
     }
 
+    if (cryptoSide === 'Buy' && selectedCryptoMarket.symbol === 'BTC/USDT') {
+      const subject = encodeURIComponent('BTC purchase request')
+      const body = encodeURIComponent([
+        'Hello,',
+        '',
+        'I would like to buy BTC through Jaguar Markets.',
+        `Quantity: ${quantity.toFixed(6)} BTC`,
+        `Estimated value: ${formatCurrency(cryptoNotional)}`,
+        '',
+        'Please confirm the next steps.',
+      ].join('\n'))
+      window.location.assign(`mailto:ronloy255@gmail.com?subject=${subject}&body=${body}`)
+      return
+    }
+
     const order = {
       symbol: selectedCryptoMarket.symbol,
       side: cryptoSide,
