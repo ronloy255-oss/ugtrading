@@ -496,6 +496,20 @@ a.secondary-button {
   font-size: clamp(2rem, 4vw, 3rem);
 }
 
+.customer-identity-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 14px;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.customer-identity-line span:first-child {
+  color: #67e8f9;
+  font-weight: 700;
+}
+
 .customer-status-box {
   min-width: 220px;
   padding: 18px 20px;

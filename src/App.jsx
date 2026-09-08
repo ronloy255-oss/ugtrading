@@ -93,7 +93,10 @@ const auditLog = [
 
 const initialCustomers = [
   {
+    customerId: 'CUS-AVA-001',
     name: 'Ava Lee',
+    email: 'ava.lee@example.com',
+    accountNumber: 'JM-1001842',
     account: 'Standard',
     balance: '$12,500',
     status: 'Approved',
@@ -111,7 +114,10 @@ const initialCustomers = [
     lastFunding: 'Today',
   },
   {
+    customerId: 'CUS-NOA-002',
     name: 'Noah Patel',
+    email: 'noah.patel@example.com',
+    accountNumber: 'JM-1001843',
     account: 'Margin',
     balance: '$34,800',
     status: 'Pending',
@@ -314,9 +320,11 @@ function App() {
 
   const handleLogin = () => {
     if (loginForm.email && loginForm.password) {
+      const customer = customers.find((item) => item.email?.toLowerCase() === loginForm.email.trim().toLowerCase())
+      if (customer) setSelectedCustomer(customer.name)
       setIsLoggedIn(true)
       setCurrentFlowStep(2)
-      setStatus(`Welcome back, ${loginForm.email.split('@')[0]}. You are signed in and can continue with operations.`)
+      setStatus(`Welcome back, ${customer?.name || loginForm.email.split('@')[0]}. Your private customer workspace is ready.`)
       setShowLoginModal(false)
       return
     }
@@ -397,7 +405,10 @@ function App() {
     }
 
     const entry = {
+      customerId: `CUS-${name.replace(/[^a-zA-Z]/g, '').slice(0, 6).toUpperCase()}-${Date.now().toString().slice(-4)}`,
       name,
+      email,
+      accountNumber: `JM-${Math.floor(1000000 + Math.random() * 8999999)}`,
       account: accountForm.accountType,
       balance: `$${initialBalance.toLocaleString()}`,
       status: 'Approved',
@@ -417,6 +428,9 @@ function App() {
 
     setCustomers((current) => [entry, ...current])
     setSelectedCustomer(name)
+    setIsLoggedIn(true)
+    setCurrentView('customer')
+    setCustomerSubView('overview')
     setSelectedPaymentMethod(paymentMethod)
     setCurrentFlowStep(2)
     setStatus(`Account approved for ${name}. ${paymentMethod} funding is verified and will settle through MTN Mobile Money ${settlementAccounts.mtn} or Airtel Money ${settlementAccounts.airtel}.`)
@@ -812,6 +826,10 @@ function App() {
               <p className="subtitle">
                 Welcome back. Your account is active and ready for funding, settlement, and trading review.
               </p>
+              <div className="customer-identity-line">
+                <span>{activeCustomer.accountNumber}</span>
+                <span>{activeCustomer.email}</span>
+              </div>
             </div>
             <div className="customer-status-box">
               <span>Account status</span>
@@ -984,6 +1002,14 @@ function App() {
                   <div className="detail-card">
                     <span>Full name</span>
                     <strong>{activeCustomer.name}</strong>
+                  </div>
+                  <div className="detail-card">
+                    <span>Account number</span>
+                    <strong>{activeCustomer.accountNumber}</strong>
+                  </div>
+                  <div className="detail-card">
+                    <span>Email</span>
+                    <strong>{activeCustomer.email}</strong>
                   </div>
                   <div className="detail-card">
                     <span>Account type</span>
@@ -1670,7 +1696,7 @@ function App() {
                 <div>
                   <strong>{customer.name}</strong>
                   <small>
-                  {customer.account} • ${customer.walletBalance.toLocaleString()} • {customer.paymentMethod}
+                  {customer.accountNumber} • {customer.account} • ${customer.walletBalance.toLocaleString()} • {customer.paymentMethod}
                   {customer.mobileMoneyNumber ? ` • MM: ${customer.mobileMoneyNumber}` : ''}
                   {customer.cardNumber ? ` • Card: ****${customer.cardNumber.slice(-4)}` : ''}
                 </small>
