@@ -1,5 +1,6 @@
 import http from 'node:http'
 import { randomUUID } from 'node:crypto'
+import { createClient } from '@supabase/supabase-js'
 
 const port = Number(process.env.PAYMENT_API_PORT || 8787)
 const isProduction = process.env.PAYMENT_ENV === 'production'
@@ -11,6 +12,9 @@ const airtelBaseUrl = isProduction
   ? 'https://openapi.airtel.africa'
   : 'https://openapiuat.airtel.africa'
 const transactions = new Map()
+const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null
 const corsHeaders = {
   'Access-Control-Allow-Origin': process.env.APP_ORIGIN || '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -168,6 +172,21 @@ const verifyWebhook = (request) => {
   return Boolean(configuredSecret && request.headers['x-webhook-secret'] === configuredSecret)
 }
 
+const persistTransaction = async (transaction) => {
+  if (!supabase) return
+  const { error } = await supabase.from('payment_transactions').upsert({
+    provider: transaction.provider,
+    provider_reference: transaction.reference,
+    amount: transaction.amount,
+    currency: transaction.currency,
+    phone_last4: transaction.phoneLast4,
+    status: transaction.status,
+    provider_status: transaction.providerStatus || null,
+    updated_at: transaction.updatedAt || new Date().toISOString(),
+  }, { onConflict: 'provider_reference' })
+  if (error) throw new Error(`Supabase transaction persistence failed: ${error.message}`)
+}
+
 const server = http.createServer(async (request, response) => {
   if (request.method === 'OPTIONS') {
     response.writeHead(204, corsHeaders)
@@ -201,6 +220,7 @@ const server = http.createServer(async (request, response) => {
         status: result.status,
         createdAt: new Date().toISOString(),
       })
+      await persistTransaction(transactions.get(reference))
 
       return json(response, 202, { provider, environment, ...result })
     } catch (error) {
@@ -221,6 +241,7 @@ const server = http.createServer(async (request, response) => {
       transaction.status = normalizeStatus(providerStatus)
       transaction.providerStatus = providerStatus
       transactions.set(reference, transaction)
+      await persistTransaction(transaction)
       return json(response, 200, transaction)
     } catch (error) {
       return json(response, 502, { error: error.message, reference })
@@ -243,7 +264,32 @@ const server = http.createServer(async (request, response) => {
       transaction.status = normalizeStatus(transaction.providerStatus)
       transaction.updatedAt = new Date().toISOString()
       transactions.set(reference, transaction)
+      await persistTransaction(transaction)
       return json(response, 200, { received: true, reference, status: transaction.status })
+    } catch (error) {
+      return json(response, 400, { error: error.message })
+    }
+  }
+
+  if (request.method === 'POST' && request.url === '/api/payments/withdrawals') {
+    try {
+      const body = await readBody(request)
+      const { customerId, paymentMethodId, amount, currency = 'UGX' } = body
+      if (!required([customerId, paymentMethodId]) || !Number(amount) || Number(amount) <= 0) {
+        return json(response, 400, { error: 'customerId, paymentMethodId, and a positive amount are required' })
+      }
+      if (!supabase) {
+        return json(response, 202, { status: 'pending_review', message: 'Withdrawal queued in sandbox mode.' })
+      }
+
+      const { data, error } = await supabase.from('withdrawal_requests').insert({
+        customer_id: customerId,
+        payment_method_id: paymentMethodId,
+        amount: Number(amount),
+        currency,
+      }).select('id, status, created_at').single()
+      if (error) throw new Error(`Supabase withdrawal persistence failed: ${error.message}`)
+      return json(response, 202, data)
     } catch (error) {
       return json(response, 400, { error: error.message })
     }

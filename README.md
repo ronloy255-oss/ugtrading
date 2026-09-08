@@ -15,6 +15,10 @@ The adapter defaults to sandbox mode. Set `PAYMENT_ENV=production` only after th
 
 The collection endpoint is `POST /api/payments/collect` with JSON containing `provider` (`mtn` or `airtel`), `amount`, `currency`, and `phone`. The API returns `pending_customer_confirmation`; the customer must approve the prompt in their mobile-money wallet before funds are treated as settled.
 
+## Supabase persistence
+
+Run `supabase/schema.sql` in the Supabase SQL editor, then add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to `.env`. The service-role key is server-only and must never be exposed to Vite. The API persists payment transactions and accepts withdrawal requests at `POST /api/payments/withdrawals`.
+
 This is an integration foundation, not a complete regulated financial service. Production launch still requires verified webhooks, persistent transaction records, authentication, KYC/AML controls, reconciliation, refund handling, and legal approval.
 
 ## Frontend development
