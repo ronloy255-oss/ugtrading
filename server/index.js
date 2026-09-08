@@ -12,7 +12,8 @@ const airtelBaseUrl = isProduction
   ? 'https://openapi.airtel.africa'
   : 'https://openapiuat.airtel.africa'
 const transactions = new Map()
-const binanceBaseUrl = process.env.BINANCE_BASE_URL || 'https://testnet.binance.vision'
+const cryptoTradingMode = process.env.BINANCE_TRADING_MODE === 'live' ? 'live' : 'testnet'
+const binanceBaseUrl = process.env.BINANCE_BASE_URL || (cryptoTradingMode === 'live' ? 'https://api.binance.com' : 'https://testnet.binance.vision')
 const allowedCryptoSymbols = new Set(['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT'])
 const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
   ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
@@ -242,7 +243,7 @@ const server = http.createServer(async (request, response) => {
       const requestUrl = new URL(request.url, `http://${request.headers.host}`)
       const symbols = (requestUrl.searchParams.get('symbols') || 'BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT').split(',')
       const markets = await Promise.all(symbols.map((symbol) => cryptoTicker(symbol)))
-      return json(response, 200, { provider: 'binance-spot-testnet', markets })
+      return json(response, 200, { provider: `binance-spot-${cryptoTradingMode}`, markets })
     } catch (error) {
       return json(response, 502, { error: error.message })
     }
@@ -252,7 +253,7 @@ const server = http.createServer(async (request, response) => {
     try {
       const account = await binanceRequest('/api/v3/account', { signed: true })
       return json(response, 200, {
-        provider: 'binance-spot-testnet',
+        provider: `binance-spot-${cryptoTradingMode}`,
         balances: account.balances.filter((balance) => Number(balance.free) || Number(balance.locked)),
       })
     } catch (error) {
@@ -270,12 +271,16 @@ const server = http.createServer(async (request, response) => {
         return json(response, 400, { error: 'Supported symbol, BUY/SELL side, and positive quantity are required' })
       }
 
+      if (cryptoTradingMode === 'live' && binanceBaseUrl !== 'https://api.binance.com') {
+        return json(response, 503, { error: 'Live mode requires BINANCE_BASE_URL=https://api.binance.com' })
+      }
+
       const order = await binanceRequest('/api/v3/order', {
         method: 'POST',
         signed: true,
         params: { symbol, side, type: 'MARKET', quantity: quantity.toFixed(6), newOrderRespType: 'FULL' },
       })
-      return json(response, 201, { provider: 'binance-spot-testnet', order })
+      return json(response, 201, { provider: `binance-spot-${cryptoTradingMode}`, order })
     } catch (error) {
       return json(response, 502, { error: error.message })
     }

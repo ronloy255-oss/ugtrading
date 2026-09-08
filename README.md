@@ -21,7 +21,7 @@ Run `supabase/schema.sql` in the Supabase SQL editor, then add `SUPABASE_URL` an
 
 ## Crypto trading
 
-The crypto workspace uses Binance Spot Testnet through the server API. Add `BINANCE_API_KEY` and `BINANCE_API_SECRET` from the Binance testnet account to `.env`. The browser requests live testnet quotes from `GET /api/crypto/markets` and submits market orders through `POST /api/crypto/orders`; credentials never enter the browser. Switch `BINANCE_BASE_URL` and credentials only after completing exchange and regulatory requirements for live trading.
+The crypto workspace uses Binance Spot through the server API. Add `BINANCE_API_KEY` and `BINANCE_API_SECRET` from the appropriate Binance account to `.env`. The browser requests quotes from `GET /api/crypto/markets` and submits market orders through `POST /api/crypto/orders`; credentials never enter the browser. Testnet is the default. To intentionally enable live trading, set `BINANCE_TRADING_MODE=live`, set `BINANCE_BASE_URL=https://api.binance.com`, and use live API credentials only after completing exchange, account, jurisdiction, and regulatory requirements. Live orders can lose real funds.
 
 This is an integration foundation, not a complete regulated financial service. Production launch still requires verified webhooks, persistent transaction records, authentication, KYC/AML controls, reconciliation, refund handling, and legal approval.
 

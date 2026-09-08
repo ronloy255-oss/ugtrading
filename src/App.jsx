@@ -283,7 +283,7 @@ function App() {
           const liveMarket = data.markets.find((item) => item.symbol === market.symbol.replace('/', ''))
           return liveMarket ? { ...market, ...liveMarket, symbol: market.symbol } : market
         }))
-        setStatus('Live Binance Spot Testnet crypto prices connected.')
+        setStatus(`Live ${data.provider} crypto prices connected.`)
       })
       .catch((error) => setStatus(`Live crypto feed unavailable: ${error.message}`))
   }, [currentView])
@@ -399,7 +399,7 @@ function App() {
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         }
         setCryptoOrders((current) => [order, ...current].slice(0, 5))
-        setStatus(`${cryptoSide} order submitted to Binance Spot Testnet for ${order.quantity} ${selectedCryptoMarket.symbol}.`)
+        setStatus(`${cryptoSide} order submitted to ${data.provider} for ${order.quantity} ${selectedCryptoMarket.symbol}.`)
       })
       .catch((error) => setStatus(`Crypto order failed: ${error.message}`))
   }
