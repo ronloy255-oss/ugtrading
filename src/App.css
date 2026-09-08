@@ -78,6 +78,13 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+a.primary-button,
+a.secondary-button {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}
+
 .primary-button {
   background: linear-gradient(135deg, #34d399, #22c55e);
   color: #03130c;

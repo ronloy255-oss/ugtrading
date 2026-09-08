@@ -238,6 +238,7 @@ function App() {
   const currentWorkflowStage = workflowStages[Math.min(currentFlowStep, workflowStages.length - 1)]
   const selectedCryptoMarket = cryptoMarkets.find((market) => market.symbol === selectedCrypto) ?? cryptoMarkets[0]
   const cryptoNotional = Number((selectedCryptoMarket.price * Number(cryptoQuantity || 0)).toFixed(2))
+  const btcEmailHref = `mailto:ronloy255@gmail.com?subject=${encodeURIComponent('BTC purchase request')}&body=${encodeURIComponent(`Hello,\n\nI would like to buy BTC through Jaguar Markets.\nQuantity: ${Number(cryptoQuantity || 0).toFixed(6)} BTC\nEstimated value: ${formatCurrency(cryptoNotional)}\n\nPlease confirm the next steps.`)}`
 
   const openConfirmation = () => {
     setShowModal(true)
@@ -1138,7 +1139,11 @@ function App() {
               <div className="crypto-input-wrap"><input id="cryptoQuantity" type="number" min="0.000001" step="0.000001" value={cryptoQuantity} onChange={(event) => setCryptoQuantity(event.target.value)} /><span>{selectedCryptoMarket.symbol.split('/')[0]}</span></div>
               <div className="order-summary crypto-summary"><div><span>Mark price</span><strong>${selectedCryptoMarket.price.toLocaleString()}</strong></div><div><span>Estimated total</span><strong>{formatCurrency(cryptoNotional)}</strong></div></div>
               <div className="account-balance compact"><span>Settlement wallet</span><strong>8,420.55 USDT</strong><small>Verified crypto balance • instant demo settlement</small></div>
-              <button type="button" className={cryptoSide === 'Buy' ? 'primary-button order-button buy-action' : 'secondary-button order-button sell-action'} onClick={handleCryptoOrder}>{cryptoSide} {selectedCryptoMarket.symbol.split('/')[0]}</button>
+              {cryptoSide === 'Buy' && selectedCryptoMarket.symbol === 'BTC/USDT' ? (
+                <a className="primary-button order-button buy-action" href={btcEmailHref}>Email BTC purchase request</a>
+              ) : (
+                <button type="button" className={cryptoSide === 'Buy' ? 'primary-button order-button buy-action' : 'secondary-button order-button sell-action'} onClick={handleCryptoOrder}>{cryptoSide} {selectedCryptoMarket.symbol.split('/')[0]}</button>
+              )}
               <p className="demo-note">Demo execution only. Connect a regulated exchange or broker API before accepting real orders.</p>
             </article>
           </section>
